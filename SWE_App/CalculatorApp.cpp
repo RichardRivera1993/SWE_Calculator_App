@@ -141,14 +141,14 @@ void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
     case ID_BUTTON_DECIMAL: label = "."; break;
     case ID_BUTTON_NEGATIVE: label = "-"; break;
     case ID_BUTTON_EQUALS:
-        OnEquals(event);  // Call the OnEquals function
-        return;  // Exit to avoid appending "=" to the display
+        OnEquals(event);  
+        return;  
     case ID_BUTTON_BACKSPACE:
-        OnBackspace(event);  // Call the OnBackspace function
-        return;  // Exit to avoid appending "Del" to the display
+        OnBackspace(event);  
+        return;  
     case ID_BUTTON_CLEAR:
-        OnClear(event);  // Call the OnClear function
-        return;  // Exit to avoid appending "C" to the display
+        OnClear(event);  
+        return; 
 
  
 
