@@ -188,6 +188,8 @@ void CalculatorFrame::OnEquals(wxCommandEvent& event)
 }
 
 
+#include <cmath> // Include for mathematical functions like sin, cos, tan
+
 void CalculatorFrame::EvaluateExpression()
 {
     try
@@ -197,38 +199,33 @@ void CalculatorFrame::EvaluateExpression()
 
         double result = 0;
 
-        // This checks if the expression starts with a unary function
+        // Check if the expression starts with a unary function
         if (expression.StartsWith("sin")) {
             wxString argument = expression.Mid(3).Trim();
             double value = wxAtof(argument);
-            result = std::sin(value); // This assumes input is in radians
+            result = std::sin(value); // Assumes input is in radians
         }
         else if (expression.StartsWith("cos")) {
             wxString argument = expression.Mid(3).Trim();
             double value = wxAtof(argument);
-            result = std::cos(value); 
+            result = std::cos(value); // Assumes input is in radians
         }
         else if (expression.StartsWith("tan")) {
             wxString argument = expression.Mid(3).Trim();
             double value = wxAtof(argument);
-            result = std::tan(value); 
+            result = std::tan(value); // Assumes input is in radians
         }
         else {
             int operatorPos = -1;
             wxString operation;
-            bool isUnaryNegation = false;
-
-            // This checks if the expression starts with a negative sign for unary negation
-            int startIdx = 0;
-            if (expression[0] == '-') {
-                startIdx = 1; // Start after the initial '-' and mark it as unary negation
-                isUnaryNegation = true;
-            }
+            bool isUnaryNegation = (expression[0] == '-'); // Start by checking for initial unary negation
+            int startIdx = isUnaryNegation ? 1 : 0;
 
             bool operatorFound = false;
 
-            // This scans for the main operator in the expression
+            // Scan for the main operator in the expression
             for (int i = startIdx; i < expression.length(); ++i) {
+                // Check if current character is an operator (excluding unary negation at the start)
                 if (expression[i] == '+' || expression[i] == '*' || expression[i] == '/' || expression[i] == '%') {
                     if (operatorFound) {
                         throw std::runtime_error("Error: Multiple consecutive operators are not allowed.");
@@ -238,12 +235,20 @@ void CalculatorFrame::EvaluateExpression()
                     operatorFound = true;
                 }
                 else if (expression[i] == '-') {
+                    // Allow "-" as subtraction if an operator has already been found
                     if (operatorFound) {
-                        operatorPos = i - 1;
-                        operation = expression[i - 1];
+                        operatorPos = i;
+                        operation = '-';
+                        break;
+                    }
+                    else if (i > 0 && wxIsdigit(expression[i - 1])) {
+                        // If "-" follows a number, treat it as a subtraction operator
+                        operatorPos = i;
+                        operation = '-';
                         break;
                     }
                     else {
+                        // Otherwise, treat it as part of a negative number
                         operatorFound = true;
                     }
                 }
@@ -252,26 +257,29 @@ void CalculatorFrame::EvaluateExpression()
                 }
             }
 
-            // This checks if an operator was found
+            // Check if an operator was found
             if (operatorPos == -1) {
                 throw std::runtime_error("Error: Missing operator.");
             }
 
-            // These extract the first and second numbers, allowing for unary negation
+            // Extract the first number, allowing for initial unary negation
             wxString num1Str = expression.Mid(0, operatorPos).Trim();
             double num1 = wxAtof(num1Str);
 
-           // second number
+            // Extract the second number, allowing for unary negation
             wxString num2Str = expression.Mid(operatorPos + 1).Trim();
             if (num2Str.StartsWith("-")) {
+                // Handle cases like "1 - -3" by keeping the negative sign in num2
                 num2Str = "-" + num2Str.Mid(1).Trim();
             }
             double num2 = wxAtof(num2Str);
 
+            // Validate that both operands are provided
             if (num1Str.IsEmpty() || num2Str.IsEmpty()) {
                 throw std::runtime_error("Error: Missing operand(s).");
             }
 
+            // Perform calculation based on the operator
             if (operation == "+") result = num1 + num2;
             else if (operation == "-") result = num1 - num2;
             else if (operation == "*") result = num1 * num2;
@@ -288,7 +296,7 @@ void CalculatorFrame::EvaluateExpression()
             }
         }
 
-        // This displays the result with appropriate formatting
+        // Display the result with appropriate formatting
         if (result == static_cast<int>(result)) {
             // If result is a whole number, show without decimal places
             display->SetValue(wxString::Format("%d", static_cast<int>(result)));
@@ -309,6 +317,7 @@ void CalculatorFrame::EvaluateExpression()
         display->Clear();
     }
 }
+
 
 
 
