@@ -18,20 +18,20 @@ void CalculatorFrame::CreateCalculatorUI()
 {
     wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
 
-    // Create the display for showing calculations
+    // This creates the display for showing calculations
     wxTextCtrl* display = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(400, 50), wxTE_RIGHT);
     vbox->Add(display, 0, wxEXPAND | wxALL, 10);
 
-    // Create grid sizer for buttons (5 columns to accommodate numbers and operators)
-    wxGridSizer* grid = new wxGridSizer(5, 4, 10, 10);
+    // This creates grid sizer for buttons (setting rows to 0 so that wxwidgets will calculate the required rows based on the number of columns, just in case I want to add or remove buttons later.)
+    wxGridSizer* grid = new wxGridSizer(0, 4, 10, 10);
 
-    // Add number buttons (0-9) to the grid
+    // This adds number buttons (0-9) to the grid
     for (int i = 1; i <= 9; ++i) {
         wxButton* button = new wxButton(this, wxID_ANY, std::to_string(i));
         grid->Add(button, 0, wxEXPAND);
     }
 
-    // Add the remaining UI elements
+    // This adds the remaining UI elements
     grid->Add(new wxButton(this, wxID_ANY, "0"), 0, wxEXPAND);
     grid->Add(new wxButton(this, wxID_ANY, "."), 0, wxEXPAND);
     grid->Add(new wxButton(this, wxID_ANY, "+"), 0, wxEXPAND);
@@ -47,9 +47,9 @@ void CalculatorFrame::CreateCalculatorUI()
     grid->Add(new wxButton(this, wxID_ANY, "Del"), 0, wxEXPAND); // Backspace/Delete
     grid->Add(new wxButton(this, wxID_ANY, "+/-"), 0, wxEXPAND); // Negative symbol
 
-    // Add grid sizer to the main vertical sizer
+    // This adds grid sizer to the main vertical sizer
     vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
 
-    // Set the main sizer for the frame
+    // This sets the main sizer for the frame
     this->SetSizer(vbox);
 }
