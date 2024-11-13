@@ -143,7 +143,36 @@ void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
     case ID_BUTTON_TAN: label = "tan "; break;  // Tan function
     case ID_BUTTON_NEGATIVE:                   // Negative symbol handling
     {
-        display->AppendText("_"); // I changed the negative symbol to an underscore since it kept conflicting with the subtraction symbol.
+        wxString currentText = display->GetValue();
+
+        // Find the position of the last operator in the expression
+        int lastOperatorPos = -1;
+        for (int i = currentText.length() - 1; i >= 0; --i) {
+            if (currentText[i] == '+' || currentText[i] == '-' ||
+                currentText[i] == '*' || currentText[i] == '/' ||
+                currentText[i] == '%') {
+                lastOperatorPos = i;
+                break;
+            }
+        }
+
+        // Determine the starting position of the last operand
+        int operandStart = (lastOperatorPos == -1) ? 0 : lastOperatorPos + 1;
+
+        // Check if the operandStart is within the range of the current text
+        if (operandStart < currentText.length()) {
+            // Check if the last operand already has a negative symbol
+            if (currentText[operandStart] == '_') {
+                // Remove the negative symbol for the last operand
+                currentText.Remove(operandStart, 1);
+            }
+            else {
+                // Add the negative symbol at the beginning of the last operand
+                currentText.insert(operandStart, "_");
+            }
+        }
+
+        display->SetValue(currentText);
         return;
     }
     case ID_BUTTON_EQUALS:
