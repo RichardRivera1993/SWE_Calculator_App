@@ -94,13 +94,13 @@ void CalculatorFrame::CreateCalculatorUI()
 
     wxGridSizer* grid = new wxGridSizer(0, 4, 10, 10);
 
-    // Add number buttons (0-9)
+    // adding number buttons (0-9)
     grid->Add(ButtonFactory::CreateNumberButton(this, 0), 0, wxEXPAND);
     for (int i = 1; i <= 9; ++i) {
         grid->Add(ButtonFactory::CreateNumberButton(this, i), 0, wxEXPAND);
     }
 
-    // Add operation and function buttons
+    // adding operation and function buttons
     grid->Add(ButtonFactory::CreateDecimalButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateAddButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateSubtractButton(this), 0, wxEXPAND);
