@@ -67,3 +67,13 @@ wxButton* ButtonFactory::CreateNegativeButton(wxWindow* parent)
 {
     return CreateButton(parent, wxWindowID(1022), "+/-", wxSize(50,50));
 }
+
+wxButton* ButtonFactory::CreateLeftParenthesisButton(wxWindow* parent)
+{
+    return CreateButton(parent, wxWindowID(1023), "(", wxSize(50, 50));
+}
+
+wxButton* ButtonFactory::CreateRightParenthesisButton(wxWindow* parent)
+{
+    return CreateButton(parent, wxWindowID(1024), ")", wxSize(50, 50));
+}

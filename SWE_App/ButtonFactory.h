@@ -20,5 +20,7 @@ public:
     static wxButton* CreateDecimalButton(wxWindow* parent);
     static wxButton* CreateUnaryOperationButton(wxWindow* parent, const wxString& label);
     static wxButton* CreateNegativeButton(wxWindow* parent);
+    static wxButton* CreateLeftParenthesisButton(wxWindow* parent);
+    static wxButton* CreateRightParenthesisButton(wxWindow* parent);
 };
 

@@ -32,7 +32,9 @@ enum
     ID_BUTTON_SIN,
     ID_BUTTON_COS,
     ID_BUTTON_TAN,
-    ID_BUTTON_NEGATIVE
+    ID_BUTTON_NEGATIVE,
+    ID_BUTTON_LEFT_PARENTHESIS,
+    ID_BUTTON_RIGHT_PARENTHESIS
 };
 
 wxBEGIN_EVENT_TABLE(CalculatorFrame, wxFrame)
@@ -64,6 +66,8 @@ EVT_BUTTON(1019, CalculatorFrame::OnButtonClick)  // Sin
 EVT_BUTTON(1020, CalculatorFrame::OnButtonClick)  // Cos
 EVT_BUTTON(1021, CalculatorFrame::OnButtonClick)  // Tan
 EVT_BUTTON(1022, CalculatorFrame::OnButtonClick)  // Negative
+EVT_BUTTON(1023, CalculatorFrame::OnButtonClick)  // Left Parenthesis
+EVT_BUTTON(1024, CalculatorFrame::OnButtonClick)  // Right Parenthesis
 wxEND_EVENT_TABLE()
 
 
@@ -110,6 +114,8 @@ void CalculatorFrame::CreateCalculatorUI()
     grid->Add(ButtonFactory::CreateClearButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateBackspaceButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateNegativeButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateLeftParenthesisButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateRightParenthesisButton(this), 0, wxEXPAND);
 
     vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
     this->SetSizer(vbox);
@@ -142,7 +148,9 @@ void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
     case ID_BUTTON_SIN: label = "sin "; break;  // Sin function
     case ID_BUTTON_COS: label = "cos "; break;  // Cos function
     case ID_BUTTON_TAN: label = "tan "; break;  // Tan function
-    case ID_BUTTON_NEGATIVE: label = "_"; break;// Negative Function
+    case ID_BUTTON_NEGATIVE: label = "-"; break; // Negative Function
+    case ID_BUTTON_LEFT_PARENTHESIS: label = "("; break; // Left Parenthesis
+    case ID_BUTTON_RIGHT_PARENTHESIS: label = ")"; break; // Right Parenthesis
     case ID_BUTTON_EQUALS:
         OnEquals(event);
         return;
@@ -186,11 +194,6 @@ void CalculatorFrame::OnBackspace(wxCommandEvent& event)
 void CalculatorFrame::OnEquals(wxCommandEvent& event)
 {
     wxString expression = display->GetValue().Trim(true).Trim(false);
-
-    // Handle leading unary minus
-    if (expression.StartsWith("-")) {
-        expression = "0 " + expression;
-    }
 
     // Separate operators with spaces for tokenization
     expression.Replace("(", " ( ");
