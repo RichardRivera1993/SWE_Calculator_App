@@ -19,18 +19,18 @@ enum
     ID_BUTTON_7,
     ID_BUTTON_8,
     ID_BUTTON_9,
-    ID_BUTTON_DECIMAL,
     ID_BUTTON_ADD,
     ID_BUTTON_MINUS,
     ID_BUTTON_MULTIPLY,
     ID_BUTTON_DIVIDE,
     ID_BUTTON_MODULO,
-    ID_BUTTON_SIN,
-    ID_BUTTON_COS,
-    ID_BUTTON_TAN,
     ID_BUTTON_EQUALS,
     ID_BUTTON_CLEAR,
     ID_BUTTON_BACKSPACE,
+    ID_BUTTON_DECIMAL,
+    ID_BUTTON_SIN,
+    ID_BUTTON_COS,
+    ID_BUTTON_TAN,
     ID_BUTTON_NEGATIVE
 };
 
@@ -59,11 +59,12 @@ EVT_BUTTON(1015, CalculatorFrame::OnEquals)       // Equals
 EVT_BUTTON(1016, CalculatorFrame::OnClear)        // Clear
 EVT_BUTTON(1017, CalculatorFrame::OnBackspace)    // Backspace
 EVT_BUTTON(1018, CalculatorFrame::OnButtonClick)  // Decimal Point
-EVT_BUTTON(1020, CalculatorFrame::OnButtonClick)  // Sin
-EVT_BUTTON(1021, CalculatorFrame::OnButtonClick)  // Cos
-EVT_BUTTON(1022, CalculatorFrame::OnButtonClick)  // Tan
-
+EVT_BUTTON(1019, CalculatorFrame::OnButtonClick)  // Sin
+EVT_BUTTON(1020, CalculatorFrame::OnButtonClick)  // Cos
+EVT_BUTTON(1021, CalculatorFrame::OnButtonClick)  // Tan
+EVT_BUTTON(1022, CalculatorFrame::OnButtonClick)  // Negative
 wxEND_EVENT_TABLE()
+
 
 
 bool CalculatorApp::OnInit()
@@ -107,6 +108,7 @@ void CalculatorFrame::CreateCalculatorUI()
     grid->Add(ButtonFactory::CreateEqualsButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateClearButton(this), 0, wxEXPAND);
     grid->Add(ButtonFactory::CreateBackspaceButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateNegativeButton(this), 0, wxEXPAND);
 
     vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
     this->SetSizer(vbox);
@@ -130,32 +132,34 @@ void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
     case ID_BUTTON_7: label = "7"; break;
     case ID_BUTTON_8: label = "8"; break;
     case ID_BUTTON_9: label = "9"; break;
-    case ID_BUTTON_ADD: label = "+"; break;
-    case ID_BUTTON_MINUS: label = "-"; break;
-    case ID_BUTTON_MULTIPLY: label = "*"; break;
-    case ID_BUTTON_DIVIDE: label = "/"; break;
-    case ID_BUTTON_MODULO: label = "%"; break;
-    case ID_BUTTON_SIN: label = "sin "; break;
-    case ID_BUTTON_COS: label = "cos "; break;
-    case ID_BUTTON_TAN: label = "tan "; break;
-    case ID_BUTTON_DECIMAL: label = "."; break;
-    case ID_BUTTON_NEGATIVE: label = "-"; break;
+    case ID_BUTTON_DECIMAL: label = "."; break; // Decimal
+    case ID_BUTTON_ADD: label = "+"; break;     // Addition
+    case ID_BUTTON_MINUS: label = "-"; break;   // Subtraction
+    case ID_BUTTON_MULTIPLY: label = "*"; break;// Multiplication
+    case ID_BUTTON_DIVIDE: label = "/"; break;  // Division
+    case ID_BUTTON_MODULO: label = "%"; break;  // Modulo
+    case ID_BUTTON_SIN: label = "sin "; break;  // Sin function
+    case ID_BUTTON_COS: label = "cos "; break;  // Cos function
+    case ID_BUTTON_TAN: label = "tan "; break;  // Tan function
+    case ID_BUTTON_NEGATIVE:                   // Negative symbol handling
+    {
+        display->AppendText("_"); // I changed the negative symbol to an underscore since it kept conflicting with the subtraction symbol.
+        return;
+    }
     case ID_BUTTON_EQUALS:
-        OnEquals(event);  
-        return;  
+        OnEquals(event);
+        return;
     case ID_BUTTON_BACKSPACE:
-        OnBackspace(event);  
-        return;  
+        OnBackspace(event);
+        return;
     case ID_BUTTON_CLEAR:
-        OnClear(event);  
-        return; 
-
- 
-
+        OnClear(event);
+        return;
     }
 
     display->AppendText(label); // Adds the label to the display
 }
+
 
 void CalculatorFrame::OnClear(wxCommandEvent& event)
 {
@@ -187,11 +191,6 @@ void CalculatorFrame::OnEquals(wxCommandEvent& event)
     EvaluateExpression();
 }
 
-
-#include <cmath> // Include for mathematical functions like sin, cos, tan
-
-#include <cmath> // Include for mathematical functions like sin, cos, tan
-
 void CalculatorFrame::EvaluateExpression()
 {
     try
@@ -204,16 +203,19 @@ void CalculatorFrame::EvaluateExpression()
         // Check if the expression starts with a unary function
         if (expression.StartsWith("sin")) {
             wxString argument = expression.Mid(3).Trim();
+            argument.Replace("_", "-");  // Convert _ to - for negation in function
             double value = wxAtof(argument);
             result = std::sin(value); // Assumes input is in radians
         }
         else if (expression.StartsWith("cos")) {
             wxString argument = expression.Mid(3).Trim();
+            argument.Replace("_", "-");  // Convert _ to - for negation in function
             double value = wxAtof(argument);
             result = std::cos(value); // Assumes input is in radians
         }
         else if (expression.StartsWith("tan")) {
             wxString argument = expression.Mid(3).Trim();
+            argument.Replace("_", "-");  // Convert _ to - for negation in function
             double value = wxAtof(argument);
             result = std::tan(value); // Assumes input is in radians
         }
@@ -221,38 +223,16 @@ void CalculatorFrame::EvaluateExpression()
             int operatorPos = -1;
             wxString operation;
 
-            // Handle unary negation for the first operand
-            int startIdx = 0;
-            if (expression[0] == '-') {
-                startIdx = 1; // Skip the initial '-' to treat it as unary negation
-            }
-
+            // Look for the main operator in the expression
             bool operatorFound = false;
-
-            // Scan for the main operator in the expression
-            for (int i = startIdx; i < expression.length(); ++i) {
-                if (expression[i] == '+' || expression[i] == '*' || expression[i] == '/' || expression[i] == '%') {
+            for (int i = 0; i < expression.length(); ++i) {
+                if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/' || expression[i] == '%') {
                     if (operatorFound) {
                         throw std::runtime_error("Error: Multiple consecutive operators are not allowed.");
                     }
                     operatorPos = i;
                     operation = expression[i];
                     operatorFound = true;
-                }
-                else if (expression[i] == '-') {
-                    // Allow "-" as a part of the second operand if it follows an operator
-                    if (operatorFound) {
-                        operatorPos = i - 1;
-                        operation = expression[i - 1];
-                        break;
-                    }
-                    // If "-" is the first character in the operand, treat it as unary negation
-                    if (i == 0 || (i > 0 && !wxIsdigit(expression[i - 1]) && expression[i - 1] != '.')) {
-                        continue;
-                    }
-                }
-                else if (wxIsdigit(expression[i]) || expression[i] == '.') {
-                    operatorFound = false;
                 }
             }
 
@@ -261,16 +241,14 @@ void CalculatorFrame::EvaluateExpression()
                 throw std::runtime_error("Error: Missing operator.");
             }
 
-            // Extract the first operand, allowing for initial unary negation
+            // Extract the first operand, replacing _ with - for negative numbers
             wxString num1Str = expression.Mid(0, operatorPos).Trim();
+            num1Str.Replace("_", "-");  // Convert _ to - for negation
             double num1 = wxAtof(num1Str);
 
-            // Extract the second operand, allowing for unary negation
+            // Extract the second operand, replacing _ with - for negative numbers
             wxString num2Str = expression.Mid(operatorPos + 1).Trim();
-            if (num2Str.StartsWith("-")) {
-                // Include the negative sign in num2
-                num2Str = "-" + num2Str.Mid(1).Trim();
-            }
+            num2Str.Replace("_", "-");  // Convert _ to - for negation
             double num2 = wxAtof(num2Str);
 
             // Validate that both operands are provided
@@ -316,6 +294,9 @@ void CalculatorFrame::EvaluateExpression()
         display->Clear();
     }
 }
+
+
+
 
 
 

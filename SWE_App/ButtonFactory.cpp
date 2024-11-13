@@ -59,6 +59,11 @@ wxButton* ButtonFactory::CreateDecimalButton(wxWindow* parent)
 
 wxButton* ButtonFactory::CreateUnaryOperationButton(wxWindow* parent, const wxString& label)
 {
-    int id = (label == "sin") ? 1020 : (label == "cos") ? 1021 : 1022;
+    int id = (label == "sin") ? 1019 : (label == "cos") ? 1020 : 1021;
     return CreateButton(parent, wxWindowID(id), label, wxSize(50, 50));
+}
+
+wxButton* ButtonFactory::CreateNegativeButton(wxWindow* parent)
+{
+    return CreateButton(parent, wxWindowID(1022), "+/-", wxSize(50,50));
 }

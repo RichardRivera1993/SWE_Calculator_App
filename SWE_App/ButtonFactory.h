@@ -19,5 +19,6 @@ public:
     static wxButton* CreateBackspaceButton(wxWindow* parent);
     static wxButton* CreateDecimalButton(wxWindow* parent);
     static wxButton* CreateUnaryOperationButton(wxWindow* parent, const wxString& label);
+    static wxButton* CreateNegativeButton(wxWindow* parent);
 };
 
