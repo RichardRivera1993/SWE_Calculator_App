@@ -1,5 +1,6 @@
 #include "CalculatorApp.h"
 #include "ButtonFactory.h"
+#include "CalculatorProcessor.h"
 #include <wx/tokenzr.h>
 #include <cmath>
 
@@ -217,99 +218,50 @@ void CalculatorFrame::OnBackspace(wxCommandEvent& event)
 
 void CalculatorFrame::OnEquals(wxCommandEvent& event)
 {
-    EvaluateExpression();
+    wxString expression = display->GetValue().Trim(true).Trim(false);
+    expression.Replace("-", " - ");
+    expression.Replace("+", " + ");
+    expression.Replace("*", " * ");
+    expression.Replace("/", " / ");
+    expression.Replace("%", " % ");
+
+    std::string expr = expression.ToStdString();
+
+    try {
+        double result = CalculatorProcessor::GetInstance()->Calculate(expr);
+
+        if (result == static_cast<int>(result)) {
+            display->SetValue(wxString::Format("%d", static_cast<int>(result)));
+        }
+        else {
+            display->SetValue(wxString::Format("%.10f", result));
+        }
+    }
+    catch (const std::runtime_error& e) {
+        wxMessageBox(e.what(), "Calculation Error", wxICON_ERROR);
+        display->Clear();
+    }
+    catch (...) {
+        wxMessageBox("An unknown error occurred.", "Error", wxICON_ERROR);
+        display->Clear();
+    }
 }
+
 
 void CalculatorFrame::EvaluateExpression()
 {
     try
     {
-        wxString expression = display->GetValue().Trim(true).Trim(false); // Trim whitespace
-        if (expression.IsEmpty()) throw std::runtime_error("Error: Empty expression.");
+        wxString expression = display->GetValue().Trim(true).Trim(false);
+        std::string expr = expression.ToStdString();
 
-        double result = 0;
+        double result = CalculatorProcessor::GetInstance()->Calculate(expr);
 
-        // Check if the expression starts with a unary function
-        if (expression.StartsWith("sin")) {
-            wxString argument = expression.Mid(3).Trim();
-            argument.Replace("_", "-");  // Convert _ to - for negation in function
-            double value = wxAtof(argument);
-            result = std::sin(value); // Assumes input is in radians
-        }
-        else if (expression.StartsWith("cos")) {
-            wxString argument = expression.Mid(3).Trim();
-            argument.Replace("_", "-");  // Convert _ to - for negation in function
-            double value = wxAtof(argument);
-            result = std::cos(value); // Assumes input is in radians
-        }
-        else if (expression.StartsWith("tan")) {
-            wxString argument = expression.Mid(3).Trim();
-            argument.Replace("_", "-");  // Convert _ to - for negation in function
-            double value = wxAtof(argument);
-            result = std::tan(value); // Assumes input is in radians
-        }
-        else {
-            int operatorPos = -1;
-            wxString operation;
-
-            // Look for the main operator in the expression
-            bool operatorFound = false;
-            for (int i = 0; i < expression.length(); ++i) {
-                if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/' || expression[i] == '%') {
-                    if (operatorFound) {
-                        throw std::runtime_error("Error: Multiple consecutive operators are not allowed.");
-                    }
-                    operatorPos = i;
-                    operation = expression[i];
-                    operatorFound = true;
-                }
-            }
-
-            // Check if an operator was found
-            if (operatorPos == -1) {
-                throw std::runtime_error("Error: Missing operator.");
-            }
-
-            // Extract the first operand, replacing _ with - for negative numbers
-            wxString num1Str = expression.Mid(0, operatorPos).Trim();
-            num1Str.Replace("_", "-");  // Convert _ to - for negation
-            double num1 = wxAtof(num1Str);
-
-            // Extract the second operand, replacing _ with - for negative numbers
-            wxString num2Str = expression.Mid(operatorPos + 1).Trim();
-            num2Str.Replace("_", "-");  // Convert _ to - for negation
-            double num2 = wxAtof(num2Str);
-
-            // Validate that both operands are provided
-            if (num1Str.IsEmpty() || num2Str.IsEmpty()) {
-                throw std::runtime_error("Error: Missing operand(s).");
-            }
-
-            // Perform calculation based on the operator
-            if (operation == "+") result = num1 + num2;
-            else if (operation == "-") result = num1 - num2;
-            else if (operation == "*") result = num1 * num2;
-            else if (operation == "/") {
-                if (num2 == 0) throw std::runtime_error("Error: Division by zero.");
-                result = num1 / num2;
-            }
-            else if (operation == "%") {
-                if (num2 == 0) throw std::runtime_error("Error: Modulo by zero.");
-                result = static_cast<int>(num1) % static_cast<int>(num2);
-            }
-            else {
-                throw std::runtime_error("Error: Invalid operation.");
-            }
-        }
-
-        // Display the result with appropriate formatting
         if (result == static_cast<int>(result)) {
-            // If result is a whole number, show without decimal places
             display->SetValue(wxString::Format("%d", static_cast<int>(result)));
         }
         else {
-            // If result has a decimal part, show with limited precision
-            display->SetValue(wxString::Format("%.6f", result));
+            display->SetValue(wxString::Format("%.10f", result));
         }
     }
     catch (const std::runtime_error& e)
@@ -323,6 +275,7 @@ void CalculatorFrame::EvaluateExpression()
         display->Clear();
     }
 }
+
 
 
 
