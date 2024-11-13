@@ -142,40 +142,7 @@ void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
     case ID_BUTTON_SIN: label = "sin "; break;  // Sin function
     case ID_BUTTON_COS: label = "cos "; break;  // Cos function
     case ID_BUTTON_TAN: label = "tan "; break;  // Tan function
-    case ID_BUTTON_NEGATIVE:                   // Negative symbol handling
-    {
-        wxString currentText = display->GetValue();
-
-        // Find the position of the last operator in the expression
-        int lastOperatorPos = -1;
-        for (int i = currentText.length() - 1; i >= 0; --i) {
-            if (currentText[i] == '+' || currentText[i] == '-' ||
-                currentText[i] == '*' || currentText[i] == '/' ||
-                currentText[i] == '%') {
-                lastOperatorPos = i;
-                break;
-            }
-        }
-
-        // Determine the starting position of the last operand
-        int operandStart = (lastOperatorPos == -1) ? 0 : lastOperatorPos + 1;
-
-        // Check if the operandStart is within the range of the current text
-        if (operandStart < currentText.length()) {
-            // Check if the last operand already has a negative symbol
-            if (currentText[operandStart] == '_') {
-                // Remove the negative symbol for the last operand
-                currentText.Remove(operandStart, 1);
-            }
-            else {
-                // Add the negative symbol at the beginning of the last operand
-                currentText.insert(operandStart, "_");
-            }
-        }
-
-        display->SetValue(currentText);
-        return;
-    }
+    case ID_BUTTON_NEGATIVE: label = "_"; break;// Negative Function
     case ID_BUTTON_EQUALS:
         OnEquals(event);
         return;
@@ -219,8 +186,17 @@ void CalculatorFrame::OnBackspace(wxCommandEvent& event)
 void CalculatorFrame::OnEquals(wxCommandEvent& event)
 {
     wxString expression = display->GetValue().Trim(true).Trim(false);
-    expression.Replace("-", " - ");
+
+    // Handle leading unary minus
+    if (expression.StartsWith("-")) {
+        expression = "0 " + expression;
+    }
+
+    // Separate operators with spaces for tokenization
+    expression.Replace("(", " ( ");
+    expression.Replace(")", " ) ");
     expression.Replace("+", " + ");
+    expression.Replace("-", " - ");
     expression.Replace("*", " * ");
     expression.Replace("/", " / ");
     expression.Replace("%", " % ");
@@ -230,6 +206,7 @@ void CalculatorFrame::OnEquals(wxCommandEvent& event)
     try {
         double result = CalculatorProcessor::GetInstance()->Calculate(expr);
 
+        // Display result as integer or floating-point
         if (result == static_cast<int>(result)) {
             display->SetValue(wxString::Format("%d", static_cast<int>(result)));
         }
@@ -246,6 +223,7 @@ void CalculatorFrame::OnEquals(wxCommandEvent& event)
         display->Clear();
     }
 }
+
 
 
 void CalculatorFrame::EvaluateExpression()
