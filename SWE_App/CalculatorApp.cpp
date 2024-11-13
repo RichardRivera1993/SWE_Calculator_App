@@ -1,4 +1,5 @@
 #include "CalculatorApp.h"
+#include "ButtonFactory.h"
 #include <wx/tokenzr.h>
 #include <cmath>
 
@@ -34,31 +35,36 @@ enum
 };
 
 wxBEGIN_EVENT_TABLE(CalculatorFrame, wxFrame)
-EVT_BUTTON(ID_BUTTON_0, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_1, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_2, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_3, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_4, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_5, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_6, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_7, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_8, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_9, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_DECIMAL, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_ADD, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_MINUS, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_MULTIPLY, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_DIVIDE, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_MODULO, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_SIN, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_COS, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_TAN, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_NEGATIVE, CalculatorFrame::OnButtonClick)
-EVT_BUTTON(ID_BUTTON_CLEAR, CalculatorFrame::OnClear)
-EVT_BUTTON(ID_BUTTON_BACKSPACE, CalculatorFrame::OnBackspace)
-EVT_BUTTON(ID_BUTTON_EQUALS, CalculatorFrame::OnEquals)
+// Number Buttons
+EVT_BUTTON(1000, CalculatorFrame::OnButtonClick) // Button 0
+EVT_BUTTON(1001, CalculatorFrame::OnButtonClick) // Button 1
+EVT_BUTTON(1002, CalculatorFrame::OnButtonClick) // Button 2
+EVT_BUTTON(1003, CalculatorFrame::OnButtonClick) // Button 3
+EVT_BUTTON(1004, CalculatorFrame::OnButtonClick) // Button 4
+EVT_BUTTON(1005, CalculatorFrame::OnButtonClick) // Button 5
+EVT_BUTTON(1006, CalculatorFrame::OnButtonClick) // Button 6
+EVT_BUTTON(1007, CalculatorFrame::OnButtonClick) // Button 7
+EVT_BUTTON(1008, CalculatorFrame::OnButtonClick) // Button 8
+EVT_BUTTON(1009, CalculatorFrame::OnButtonClick) // Button 9
+
+// Operation Buttons
+EVT_BUTTON(1010, CalculatorFrame::OnButtonClick) // Addition
+EVT_BUTTON(1011, CalculatorFrame::OnButtonClick) // Subtraction
+EVT_BUTTON(1012, CalculatorFrame::OnButtonClick) // Multiplication
+EVT_BUTTON(1013, CalculatorFrame::OnButtonClick) // Division
+EVT_BUTTON(1014, CalculatorFrame::OnButtonClick) // Modulo
+
+// Function Buttons
+EVT_BUTTON(1015, CalculatorFrame::OnEquals)       // Equals
+EVT_BUTTON(1016, CalculatorFrame::OnClear)        // Clear
+EVT_BUTTON(1017, CalculatorFrame::OnBackspace)    // Backspace
+EVT_BUTTON(1018, CalculatorFrame::OnButtonClick)  // Decimal Point
+EVT_BUTTON(1020, CalculatorFrame::OnButtonClick)  // Sin
+EVT_BUTTON(1021, CalculatorFrame::OnButtonClick)  // Cos
+EVT_BUTTON(1022, CalculatorFrame::OnButtonClick)  // Tan
 
 wxEND_EVENT_TABLE()
+
 
 bool CalculatorApp::OnInit()
 {
@@ -80,38 +86,32 @@ void CalculatorFrame::CreateCalculatorUI()
     display = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(400, 50), wxTE_RIGHT);
     vbox->Add(display, 0, wxEXPAND | wxALL, 10);
 
-    // This creates grid sizer for buttons (setting rows to 0 so that wxwidgets will calculate the required rows based on the number of columns, just in case I want to add or remove buttons later.)
     wxGridSizer* grid = new wxGridSizer(0, 4, 10, 10);
 
-    // This adds number buttons (0-9) to the grid
-    grid->Add(new wxButton(this, ID_BUTTON_0, "0"), 0, wxEXPAND);
+    // Add number buttons (0-9)
+    grid->Add(ButtonFactory::CreateNumberButton(this, 0), 0, wxEXPAND);
     for (int i = 1; i <= 9; ++i) {
-        wxButton* button = new wxButton(this, ID_BUTTON_1 + i - 1, std::to_string(i));
-        grid->Add(button, 0, wxEXPAND);
+        grid->Add(ButtonFactory::CreateNumberButton(this, i), 0, wxEXPAND);
     }
 
+    // Add operation and function buttons
+    grid->Add(ButtonFactory::CreateDecimalButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateAddButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateSubtractButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateMultiplyButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateDivideButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateModuloButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateUnaryOperationButton(this, "sin"), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateUnaryOperationButton(this, "cos"), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateUnaryOperationButton(this, "tan"), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateEqualsButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateClearButton(this), 0, wxEXPAND);
+    grid->Add(ButtonFactory::CreateBackspaceButton(this), 0, wxEXPAND);
 
-    // This adds the remaining UI elements
-    grid->Add(new wxButton(this, ID_BUTTON_DECIMAL, "."), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_ADD, "+"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_MINUS, "-"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_MULTIPLY, "*"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_DIVIDE, "/"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_MODULO, "%"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_SIN, "sin"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_COS, "cos"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_TAN, "tan"), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_EQUALS, "="), 0, wxEXPAND);
-    grid->Add(new wxButton(this, ID_BUTTON_CLEAR, "C"), 0, wxEXPAND); // Clear
-    grid->Add(new wxButton(this, ID_BUTTON_BACKSPACE, "Del"), 0, wxEXPAND); // Backspace
-    grid->Add(new wxButton(this, ID_BUTTON_NEGATIVE, "+/-"), 0, wxEXPAND); // Negative symbol
-
-    // This adds grid sizer to the main vertical sizer
     vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
-
-    // This sets the main sizer for the frame
     this->SetSizer(vbox);
 }
+
 
 void CalculatorFrame::OnButtonClick(wxCommandEvent& event)
 {
