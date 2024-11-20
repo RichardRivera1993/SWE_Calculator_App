@@ -1,28 +1,50 @@
 #include "C:\Users\dabig\source\repos\SWE_App\SWE_App\ButtonFactory.h"
 #include "CppUnitTest.h"
+#include "TestApp.h"
 #include <wx/button.h>
-#include <wx/window.h>
+#include <wx/frame.h>
+#include <string>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace CalculatorAppTests
 {
-    // Minimal wxApp for testing wxWidgets components
-    class TestApp : public wxApp
-    {
-    public:
-        virtual bool OnInit() { return true; }
-    };
-
-    wxIMPLEMENT_APP_NO_MAIN(TestApp); // Prevents automatic app initialization
-
+    // This defines a test class for ButtonFactory
     TEST_CLASS(ButtonFactoryTests)
     {
     public:
+        // Static parent frame shared across all tests
+        static wxFrame* parent;
 
+        // Initialize method runs before each test
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            // Initialize wxWidgets only once
+            if (!wxTheApp)
+            {
+                int argc = 0;
+                char** argv = nullptr;
+                wxEntryStart(argc, argv);
+                wxTheApp->CallOnInit();
+            }
+
+            // Create a parent frame if not already created
+            if (!parent)
+            {
+                parent = new wxFrame(nullptr, wxID_ANY, "Test Frame");
+                parent->Show(false); // Keep the frame hidden
+            }
+        }
+
+        // Set up a clean up method to run after each test.
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+   
+        }
+
+        // Testing creation of number buttons.
         TEST_METHOD(TestCreateNumberButton)
         {
-            wxWindow* parent = nullptr; // For testing, parent can be nullptr
             int number = 5;
             wxButton* button = ButtonFactory::CreateNumberButton(parent, number);
             Assert::IsNotNull(button, L"Button should not be null.");
@@ -33,9 +55,9 @@ namespace CalculatorAppTests
             delete button; // Clean up
         }
 
+        // Testing creation of Add button.
         TEST_METHOD(TestCreateAddButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateAddButton(parent);
             Assert::IsNotNull(button, L"Add Button should not be null.");
             Assert::AreEqual(wxWindowID(1010), button->GetId(), L"Add Button ID mismatch.");
@@ -45,9 +67,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Subtract button.
         TEST_METHOD(TestCreateSubtractButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateSubtractButton(parent);
             Assert::IsNotNull(button, L"Subtract Button should not be null.");
             Assert::AreEqual(wxWindowID(1011), button->GetId(), L"Subtract Button ID mismatch.");
@@ -57,9 +79,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Multiply button.
         TEST_METHOD(TestCreateMultiplyButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateMultiplyButton(parent);
             Assert::IsNotNull(button, L"Multiply Button should not be null.");
             Assert::AreEqual(wxWindowID(1012), button->GetId(), L"Multiply Button ID mismatch.");
@@ -69,9 +91,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Divide button.
         TEST_METHOD(TestCreateDivideButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateDivideButton(parent);
             Assert::IsNotNull(button, L"Divide Button should not be null.");
             Assert::AreEqual(wxWindowID(1013), button->GetId(), L"Divide Button ID mismatch.");
@@ -81,9 +103,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Modulo button.
         TEST_METHOD(TestCreateModuloButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateModuloButton(parent);
             Assert::IsNotNull(button, L"Modulo Button should not be null.");
             Assert::AreEqual(wxWindowID(1014), button->GetId(), L"Modulo Button ID mismatch.");
@@ -93,9 +115,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Equals button.
         TEST_METHOD(TestCreateEqualsButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateEqualsButton(parent);
             Assert::IsNotNull(button, L"Equals Button should not be null.");
             Assert::AreEqual(wxWindowID(1015), button->GetId(), L"Equals Button ID mismatch.");
@@ -105,9 +127,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Clear button.
         TEST_METHOD(TestCreateClearButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateClearButton(parent);
             Assert::IsNotNull(button, L"Clear Button should not be null.");
             Assert::AreEqual(wxWindowID(1016), button->GetId(), L"Clear Button ID mismatch.");
@@ -117,9 +139,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Backspace button.
         TEST_METHOD(TestCreateBackspaceButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateBackspaceButton(parent);
             Assert::IsNotNull(button, L"Backspace Button should not be null.");
             Assert::AreEqual(wxWindowID(1017), button->GetId(), L"Backspace Button ID mismatch.");
@@ -129,9 +151,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Decimal button.
         TEST_METHOD(TestCreateDecimalButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateDecimalButton(parent);
             Assert::IsNotNull(button, L"Decimal Button should not be null.");
             Assert::AreEqual(wxWindowID(1018), button->GetId(), L"Decimal Button ID mismatch.");
@@ -141,9 +163,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Sin button.
         TEST_METHOD(TestCreateUnaryOperationButton_Sin)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateUnaryOperationButton(parent, "sin");
             Assert::IsNotNull(button, L"Sin Button should not be null.");
             Assert::AreEqual(wxWindowID(1019), button->GetId(), L"Sin Button ID mismatch.");
@@ -153,9 +175,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Cos button.
         TEST_METHOD(TestCreateUnaryOperationButton_Cos)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateUnaryOperationButton(parent, "cos");
             Assert::IsNotNull(button, L"Cos Button should not be null.");
             Assert::AreEqual(wxWindowID(1020), button->GetId(), L"Cos Button ID mismatch.");
@@ -165,9 +187,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Tan button.
         TEST_METHOD(TestCreateUnaryOperationButton_Tan)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateUnaryOperationButton(parent, "tan");
             Assert::IsNotNull(button, L"Tan Button should not be null.");
             Assert::AreEqual(wxWindowID(1021), button->GetId(), L"Tan Button ID mismatch.");
@@ -177,9 +199,9 @@ namespace CalculatorAppTests
             delete button;
         }
 
+        // Testing creation of Negative button.
         TEST_METHOD(TestCreateNegativeButton)
         {
-            wxWindow* parent = nullptr;
             wxButton* button = ButtonFactory::CreateNegativeButton(parent);
             Assert::IsNotNull(button, L"Negative Button should not be null.");
             Assert::AreEqual(wxWindowID(1022), button->GetId(), L"Negative Button ID mismatch.");
@@ -189,4 +211,7 @@ namespace CalculatorAppTests
             delete button;
         }
     };
+
+    // Initialize the static parent pointer
+    wxFrame* ButtonFactoryTests::parent = nullptr;
 }

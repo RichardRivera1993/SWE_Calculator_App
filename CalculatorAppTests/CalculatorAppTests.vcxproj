@@ -159,7 +159,6 @@
     <ClCompile Include="..\SWE_App\ButtonFactory.cpp" />
     <ClCompile Include="..\SWE_App\CalculatorProcessor.cpp" />
     <ClCompile Include="ButtonFactoryTests.cpp" />
-    <ClCompile Include="CalculatorAppTests.cpp" />
     <ClCompile Include="CalculatorProcessorTests.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -167,11 +166,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SWE_App\ButtonFactory.h" />
     <ClInclude Include="..\SWE_App\CalculatorProcessor.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="TestApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

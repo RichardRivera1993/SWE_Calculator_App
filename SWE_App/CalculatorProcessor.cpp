@@ -13,95 +13,107 @@ CalculatorProcessor* CalculatorProcessor::GetInstance()
     return instance;
 }
 
+void CalculatorProcessor::ResetInstance()
+{
+    if (instance != nullptr)
+    {
+        delete instance;
+        instance = nullptr;
+    }
+}
+
 double CalculatorProcessor::Calculate(const std::string& expression)
 {
-    std::cout << "Expression received for calculation: " << expression << std::endl;
-
-    // Convert to Reverse Polish Notation (RPN) using Shunting Yard algorithm
-    auto rpnQueue = ShuntingYard(expression);
-
-    std::cout << "RPN Queue: ";
-    std::queue<std::string> debugQueue = rpnQueue;
-    while (!debugQueue.empty()) {
-        std::cout << debugQueue.front() << " ";
-        debugQueue.pop();
-    }
-    std::cout << std::endl;
-
-    // Evaluate the RPN expression and return the result
+    std::queue<std::string> rpnQueue = ShuntingYard(expression);
     return EvaluateRPN(rpnQueue);
 }
 
-
 std::queue<std::string> CalculatorProcessor::ShuntingYard(const std::string& expression)
 {
-    std::stack<std::string> operatorStack;
     std::queue<std::string> outputQueue;
-    std::istringstream input(expression);
-    std::string token;
-    std::string prevToken; // To keep track of the previous token for unary minus detection
+    std::stack<std::string> operatorStack;
+    size_t i = 0;
+    while (i < expression.length())
+    {
+        if (isspace(expression[i]))
+        {
+            i++;
+            continue;
+        }
 
-    std::cout << "Shunting Yard input tokens: ";
-    while (input >> token) {
-        std::cout << token << " ";
-
-        if (IsNumber(token)) {
-            // Push the number directly to the output queue
-            outputQueue.push(token);
+        // Number parsing (including decimal numbers)
+        if (isdigit(expression[i]) || expression[i] == '.')
+        {
+            std::string number;
+            while (i < expression.length() && (isdigit(expression[i]) || expression[i] == '.'))
+            {
+                number += expression[i];
+                i++;
+            }
+            outputQueue.push(number);
         }
-        else if (IsUnaryFunction(token)) {
-            // Push functions onto the operator stack
-            operatorStack.push(token);
+        // Function parsing (e.g., sin, cos, tan)
+        else if (isalpha(expression[i]))
+        {
+            std::string func;
+            while (i < expression.length() && isalpha(expression[i]))
+            {
+                func += expression[i];
+                i++;
+            }
+            operatorStack.push(func);
         }
-        else if (token == "(") {
-            // Push left parentheses onto the operator stack
-            operatorStack.push(token);
-        }
-        else if (token == ")") {
-            // Pop operators from the operator stack to the output queue until a left parenthesis is encountered
-            while (!operatorStack.empty() && operatorStack.top() != "(") {
+        // Operator parsing
+        else if (IsOperator(std::string(1, expression[i])))
+        {
+            std::string op(1, expression[i]);
+            while (!operatorStack.empty() && IsOperator(operatorStack.top()) &&
+                ((GetPrecedence(operatorStack.top()) > GetPrecedence(op)) ||
+                    (GetPrecedence(operatorStack.top()) == GetPrecedence(op))))
+            {
                 outputQueue.push(operatorStack.top());
                 operatorStack.pop();
             }
-            // Pop the left parenthesis from the operator stack
-            if (!operatorStack.empty() && operatorStack.top() == "(") {
+            operatorStack.push(op);
+            i++;
+        }
+        // Left parenthesis
+        else if (expression[i] == '(')
+        {
+            operatorStack.push("(");
+            i++;
+        }
+        // Right parenthesis
+        else if (expression[i] == ')')
+        {
+            while (!operatorStack.empty() && operatorStack.top() != "(")
+            {
+                outputQueue.push(operatorStack.top());
                 operatorStack.pop();
             }
-            else {
-                throw std::runtime_error("Error: Mismatched parentheses.");
-            }
-        }
-        else if (IsOperator(token)) {
-            // Handle unary minus
-            if (token == "-" && (prevToken.empty() || IsOperator(prevToken) || prevToken == "(")) {
-                // Unary minus detected, treat it as a unary operator "u-"
-                operatorStack.push("u-");
-            }
-            else {
-                // Binary operator
-                while (!operatorStack.empty() && (
-                    (IsOperator(operatorStack.top()) && GetPrecedence(operatorStack.top()) >= GetPrecedence(token)) ||
-                    (IsUnaryFunction(operatorStack.top()) && GetPrecedence(operatorStack.top()) > GetPrecedence(token))
-                    )) {
-                    outputQueue.push(operatorStack.top());
-                    operatorStack.pop();
-                }
-                operatorStack.push(token);
-            }
-        }
-        else {
-            throw std::runtime_error("Error: Invalid token encountered.");
-        }
+            if (operatorStack.empty())
+                throw std::runtime_error("Mismatched parentheses.");
+            operatorStack.pop(); // Remove "("
 
-        prevToken = token;
+            // If top of stack is a function, pop it to output queue
+            if (!operatorStack.empty() && IsUnaryFunction(operatorStack.top()))
+            {
+                outputQueue.push(operatorStack.top());
+                operatorStack.pop();
+            }
+            i++;
+        }
+        else
+        {
+            throw std::runtime_error(std::string("Invalid character in expression: ") + expression[i]);
+        }
     }
-    std::cout << std::endl;
 
-    // Pop remaining operators from the operator stack to the output queue
-    while (!operatorStack.empty()) {
-        if (operatorStack.top() == "(" || operatorStack.top() == ")") {
-            throw std::runtime_error("Error: Mismatched parentheses.");
-        }
+    // After processing all tokens, pop any remaining operators to output queue
+    while (!operatorStack.empty())
+    {
+        if (operatorStack.top() == "(" || operatorStack.top() == ")")
+            throw std::runtime_error("Mismatched parentheses.");
         outputQueue.push(operatorStack.top());
         operatorStack.pop();
     }
@@ -109,76 +121,80 @@ std::queue<std::string> CalculatorProcessor::ShuntingYard(const std::string& exp
     return outputQueue;
 }
 
-
-
-
 double CalculatorProcessor::EvaluateRPN(std::queue<std::string>& rpnQueue)
 {
-    std::stack<double> resultStack;
-
-    std::cout << "Evaluating RPN Queue..." << std::endl;
-    while (!rpnQueue.empty()) {
+    std::stack<double> evalStack;
+    while (!rpnQueue.empty())
+    {
         std::string token = rpnQueue.front();
         rpnQueue.pop();
-        std::cout << "Processing token: " << token << std::endl;
 
-        if (IsNumber(token)) {
-            std::string numberToken = token;
-            if (numberToken[0] == '_') {
-                numberToken[0] = '-';
-            }
-            resultStack.push(std::stod(numberToken));
+        if (IsNumber(token))
+        {
+            evalStack.push(std::stod(token));
         }
-        else if (token == "_") {  // Handle `_` as unary negative
-            if (resultStack.empty()) throw std::runtime_error("Error: Missing operand for unary negative.");
-            double value = resultStack.top();
-            resultStack.pop();
-            resultStack.push(-value);  // Apply unary negation
+        else if (IsUnaryFunction(token))
+        {
+            if (evalStack.empty())
+                throw std::runtime_error("Insufficient operands for function: " + token);
+            double operand = evalStack.top();
+            evalStack.pop();
+            if (token == "sin")
+                evalStack.push(std::sin(operand));
+            else if (token == "cos")
+                evalStack.push(std::cos(operand));
+            else if (token == "tan")
+                evalStack.push(std::tan(operand));
+            else
+                throw std::runtime_error("Unknown function: " + token);
         }
-        else if (IsUnaryFunction(token)) {
-            if (resultStack.empty()) throw std::runtime_error("Error: Missing operand for function.");
-            double value = resultStack.top();
-            resultStack.pop();
-            if (token == "sin") value = std::sin(value);
-            else if (token == "cos") value = std::cos(value);
-            else if (token == "tan") value = std::tan(value);
-            else if (token == "u-") value = -value;
-            resultStack.push(value);
+        else if (IsOperator(token))
+        {
+            if (evalStack.size() < 2)
+                throw std::runtime_error("Insufficient operands for operator: " + token);
+            double right = evalStack.top(); evalStack.pop();
+            double left = evalStack.top(); evalStack.pop();
+            if (token == "+")
+                evalStack.push(left + right);
+            else if (token == "-")
+                evalStack.push(left - right);
+            else if (token == "*")
+                evalStack.push(left * right);
+            else if (token == "/")
+            {
+                if (right == 0)
+                    throw std::runtime_error("Error: Division by zero.");
+                evalStack.push(left / right);
+            }
+            else if (token == "%")
+            {
+                if (right == 0)
+                    throw std::runtime_error("Error: Modulo by zero.");
+                evalStack.push(std::fmod(left, right));
+            }
+            else
+                throw std::runtime_error("Unknown operator: " + token);
         }
-        else if (IsOperator(token)) {
-            if (resultStack.size() < 2) throw std::runtime_error("Error: Missing operand(s).");
-            double b = resultStack.top();
-            resultStack.pop();
-            double a = resultStack.top();
-            resultStack.pop();
-
-            if (token == "+") resultStack.push(a + b);
-            else if (token == "-") resultStack.push(a - b);
-            else if (token == "*") resultStack.push(a * b);
-            else if (token == "/") {
-                if (b == 0) throw std::runtime_error("Error: Division by zero.");
-                resultStack.push(a / b);
-            }
-            else if (token == "%") {
-                if (b == 0) throw std::runtime_error("Error: Modulo by zero.");
-                resultStack.push(static_cast<int>(a) % static_cast<int>(b));
-            }
+        else
+        {
+            throw std::runtime_error("Invalid token in RPN: " + token);
         }
     }
 
-    if (resultStack.size() != 1) throw std::runtime_error("Error: Invalid expression.");
-    std::cout << "Final result: " << resultStack.top() << std::endl;
-    return resultStack.top();
+    if (evalStack.size() != 1)
+        throw std::runtime_error("Invalid expression.");
+
+    return evalStack.top();
 }
-
-
 
 int CalculatorProcessor::GetPrecedence(const std::string& op)
 {
-    if (op == "sin" || op == "cos" || op == "tan") return 4;
-    if (op == "u-") return 3;
-    if (op == "*" || op == "/" || op == "%") return 2;
-    if (op == "+" || op == "-") return 1;
+    if (op == "+" || op == "-")
+        return 1;
+    if (op == "*" || op == "/" || op == "%")
+        return 2;
+    if (IsUnaryFunction(op))
+        return 3;
     return 0;
 }
 
@@ -189,19 +205,17 @@ bool CalculatorProcessor::IsOperator(const std::string& token)
 
 bool CalculatorProcessor::IsUnaryFunction(const std::string& token)
 {
-    return token == "sin" || token == "cos" || token == "tan" || token == "u-";
+    return token == "sin" || token == "cos" || token == "tan";
 }
 
 bool CalculatorProcessor::IsNumber(const std::string& token)
 {
-    if (token.empty()) return false;
-
-    // Support for underscore (_) as negative sign
-    size_t start = (token[0] == '_') ? 1 : 0;
-    for (size_t i = start; i < token.size(); ++i) {
-        if (!std::isdigit(token[i]) && token[i] != '.') {
-            return false;
-        }
-    }
-    return true;
+    if (token.empty())
+        return false;
+    std::istringstream iss(token);
+    double d;
+    char c;
+    if (!(iss >> d))
+        return false;
+    return !(iss >> c);
 }

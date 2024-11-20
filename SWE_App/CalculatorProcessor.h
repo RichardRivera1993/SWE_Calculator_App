@@ -3,12 +3,16 @@
 #include <queue>
 #include <stack>
 #include <cmath>
+#include <stdexcept>
 
 class CalculatorProcessor
 {
 public:
     // Singleton accessor
     static CalculatorProcessor* GetInstance();
+
+    // For testing: Reset the singleton instance
+    static void ResetInstance();
 
     // Calculate method that takes a string expression and returns the result
     double Calculate(const std::string& expression);

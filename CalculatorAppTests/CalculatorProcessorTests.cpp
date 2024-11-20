@@ -1,5 +1,6 @@
 #include "C:\Users\dabig\source\repos\SWE_App\SWE_App\CalculatorProcessor.h"
 #include "CppUnitTest.h"
+#include "TestApp.h"
 #include <stdexcept>
 #include <cmath>
 
@@ -10,6 +11,28 @@ namespace CalculatorAppTests
     TEST_CLASS(CalculatorProcessorTests)
     {
     public:
+        // Initialize method runs before each test
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            // Initialize wxWidgets only once
+            if (!wxTheApp)
+            {
+                int argc = 0;
+                char** argv = nullptr;
+                wxEntryStart(argc, argv);
+                wxTheApp->CallOnInit();
+            }
+
+            // Resets the singleton instance before each test
+            CalculatorProcessor::ResetInstance();
+            CalculatorProcessor::GetInstance();
+        }
+
+        // Set up a cleanup method to run after each test
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+            
+        }
 
         TEST_METHOD(TestAddition)
         {
@@ -55,9 +78,21 @@ namespace CalculatorAppTests
 
         TEST_METHOD(TestParentheses)
         {
-            CalculatorProcessor* processor = CalculatorProcessor::GetInstance();
-            double result = processor->Calculate("(2 + 3) * 4");
-            Assert::AreEqual(20.0, result, L"(2 + 3) * 4 should equal 20");
+            try
+            {
+                CalculatorProcessor* processor = CalculatorProcessor::GetInstance();
+                double result = processor->Calculate("(2 + 3) * 4");
+                Assert::AreEqual(20.0, result, L"(2 + 3) * 4 should equal 20");
+            }
+            catch (const std::exception& e)
+            {
+                std::wstring errorMsg = L"Exception thrown: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+                Assert::Fail(errorMsg.c_str());
+            }
+            catch (...)
+            {
+                Assert::Fail(L"Unknown exception thrown.");
+            }
         }
 
         TEST_METHOD(TestSinFunction)
