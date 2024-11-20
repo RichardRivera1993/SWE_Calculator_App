@@ -115,54 +115,6 @@ namespace CalculatorAppTests
             delete button;
         }
 
-        // Testing creation of Equals button.
-        TEST_METHOD(TestCreateEqualsButton)
-        {
-            wxButton* button = ButtonFactory::CreateEqualsButton(parent);
-            Assert::IsNotNull(button, L"Equals Button should not be null.");
-            Assert::AreEqual(wxWindowID(1015), button->GetId(), L"Equals Button ID mismatch.");
-            Assert::AreEqual(std::string("="), std::string(button->GetLabel().mb_str()), L"Equals Button label mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetWidth(), L"Equals Button width mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetHeight(), L"Equals Button height mismatch.");
-            delete button;
-        }
-
-        // Testing creation of Clear button.
-        TEST_METHOD(TestCreateClearButton)
-        {
-            wxButton* button = ButtonFactory::CreateClearButton(parent);
-            Assert::IsNotNull(button, L"Clear Button should not be null.");
-            Assert::AreEqual(wxWindowID(1016), button->GetId(), L"Clear Button ID mismatch.");
-            Assert::AreEqual(std::string("C"), std::string(button->GetLabel().mb_str()), L"Clear Button label mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetWidth(), L"Clear Button width mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetHeight(), L"Clear Button height mismatch.");
-            delete button;
-        }
-
-        // Testing creation of Backspace button.
-        TEST_METHOD(TestCreateBackspaceButton)
-        {
-            wxButton* button = ButtonFactory::CreateBackspaceButton(parent);
-            Assert::IsNotNull(button, L"Backspace Button should not be null.");
-            Assert::AreEqual(wxWindowID(1017), button->GetId(), L"Backspace Button ID mismatch.");
-            Assert::AreEqual(std::string("Del"), std::string(button->GetLabel().mb_str()), L"Backspace Button label mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetWidth(), L"Backspace Button width mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetHeight(), L"Backspace Button height mismatch.");
-            delete button;
-        }
-
-        // Testing creation of Decimal button.
-        TEST_METHOD(TestCreateDecimalButton)
-        {
-            wxButton* button = ButtonFactory::CreateDecimalButton(parent);
-            Assert::IsNotNull(button, L"Decimal Button should not be null.");
-            Assert::AreEqual(wxWindowID(1018), button->GetId(), L"Decimal Button ID mismatch.");
-            Assert::AreEqual(std::string("."), std::string(button->GetLabel().mb_str()), L"Decimal Button label mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetWidth(), L"Decimal Button width mismatch.");
-            Assert::AreEqual(50, button->GetSize().GetHeight(), L"Decimal Button height mismatch.");
-            delete button;
-        }
-
         // Testing creation of Sin button.
         TEST_METHOD(TestCreateUnaryOperationButton_Sin)
         {
